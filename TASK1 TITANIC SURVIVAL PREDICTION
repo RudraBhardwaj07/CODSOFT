@@ -1,1 +1,204 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import zipfile
 
+with zipfile.ZipFile('archive (2).zip', 'r') as zip_ref:
+    zip_ref.extractall()
+
+print("Dataset extracted successfully!")
+Dataset extracted successfully!
+import os
+
+print(os.listdir())
+['.ipynb_checkpoints', 'archive (2).zip', 'Iris_Flower_Classification.ipynb', 'Titanic-Dataset.csv', 'Titanic_Survival_Prediction.ipynb']
+df = pd.read_csv('Titanic-Dataset.csv')
+
+df.head()
+PassengerId	Survived	Pclass	Name	Sex	Age	SibSp	Parch	Ticket	Fare	Cabin	Embarked
+0	1	0	3	Braund, Mr. Owen Harris	male	22.0	1	0	A/5 21171	7.2500	NaN	S
+1	2	1	1	Cumings, Mrs. John Bradley (Florence Briggs Th...	female	38.0	1	0	PC 17599	71.2833	C85	C
+2	3	1	3	Heikkinen, Miss. Laina	female	26.0	0	0	STON/O2. 3101282	7.9250	NaN	S
+3	4	1	1	Futrelle, Mrs. Jacques Heath (Lily May Peel)	female	35.0	1	0	113803	53.1000	C123	S
+4	5	0	3	Allen, Mr. William Henry	male	35.0	0	0	373450	8.0500	NaN	S
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 891 entries, 0 to 890
+Data columns (total 12 columns):
+ #   Column       Non-Null Count  Dtype  
+---  ------       --------------  -----  
+ 0   PassengerId  891 non-null    int64  
+ 1   Survived     891 non-null    int64  
+ 2   Pclass       891 non-null    int64  
+ 3   Name         891 non-null    object 
+ 4   Sex          891 non-null    object 
+ 5   Age          714 non-null    float64
+ 6   SibSp        891 non-null    int64  
+ 7   Parch        891 non-null    int64  
+ 8   Ticket       891 non-null    object 
+ 9   Fare         891 non-null    float64
+ 10  Cabin        204 non-null    object 
+ 11  Embarked     889 non-null    object 
+dtypes: float64(2), int64(5), object(5)
+memory usage: 83.7+ KB
+df.isnull().sum()
+PassengerId      0
+Survived         0
+Pclass           0
+Name             0
+Sex              0
+Age            177
+SibSp            0
+Parch            0
+Ticket           0
+Fare             0
+Cabin          687
+Embarked         2
+dtype: int64
+# Fill missing values in Age with median
+df['Age'] = df['Age'].fillna(df['Age'].median())
+# Fill missing values in Embarked with mode
+df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])# Drop Cabin column
+df = df.drop('Cabin', axis=1)
+print("Missing values handled successfully!")
+---------------------------------------------------------------------------
+KeyError                                  Traceback (most recent call last)
+Cell In[19], line 5
+      3 # Fill missing values in Embarked with mode
+      4 df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])# Drop Cabin column
+----> 5 df = df.drop('Cabin', axis=1)
+      6 print("Missing values handled successfully!")
+
+File ~\anaconda3\Lib\site-packages\pandas\core\frame.py:5581, in DataFrame.drop(self, labels, axis, index, columns, level, inplace, errors)
+   5433 def drop(
+   5434     self,
+   5435     labels: IndexLabel | None = None,
+   (...)
+   5442     errors: IgnoreRaise = "raise",
+   5443 ) -> DataFrame | None:
+   5444     """
+   5445     Drop specified labels from rows or columns.
+   5446 
+   (...)
+   5579             weight  1.0     0.8
+   5580     """
+-> 5581     return super().drop(
+   5582         labels=labels,
+   5583         axis=axis,
+   5584         index=index,
+   5585         columns=columns,
+   5586         level=level,
+   5587         inplace=inplace,
+   5588         errors=errors,
+   5589     )
+
+File ~\anaconda3\Lib\site-packages\pandas\core\generic.py:4788, in NDFrame.drop(self, labels, axis, index, columns, level, inplace, errors)
+   4786 for axis, labels in axes.items():
+   4787     if labels is not None:
+-> 4788         obj = obj._drop_axis(labels, axis, level=level, errors=errors)
+   4790 if inplace:
+   4791     self._update_inplace(obj)
+
+File ~\anaconda3\Lib\site-packages\pandas\core\generic.py:4830, in NDFrame._drop_axis(self, labels, axis, level, errors, only_slice)
+   4828         new_axis = axis.drop(labels, level=level, errors=errors)
+   4829     else:
+-> 4830         new_axis = axis.drop(labels, errors=errors)
+   4831     indexer = axis.get_indexer(new_axis)
+   4833 # Case for non-unique axis
+   4834 else:
+
+File ~\anaconda3\Lib\site-packages\pandas\core\indexes\base.py:7070, in Index.drop(self, labels, errors)
+   7068 if mask.any():
+   7069     if errors != "ignore":
+-> 7070         raise KeyError(f"{labels[mask].tolist()} not found in axis")
+   7071     indexer = indexer[~mask]
+   7072 return self.delete(indexer)
+
+KeyError: "['Cabin'] not found in axis"
+df.isnull().sum()
+PassengerId    0
+Survived       0
+Pclass         0
+Name           0
+Sex            0
+Age            0
+SibSp          0
+Parch          0
+Ticket         0
+Fare           0
+Embarked       0
+dtype: int64
+df = pd.get_dummies(df, columns=['Sex', 'Embarked'], drop_first=True)
+
+print("Categorical variables encoded successfully!")
+Categorical variables encoded successfully!
+df.head()
+PassengerId	Survived	Pclass	Name	Age	SibSp	Parch	Ticket	Fare	Sex_male	Embarked_Q	Embarked_S
+0	1	0	3	Braund, Mr. Owen Harris	22.0	1	0	A/5 21171	7.2500	True	False	True
+1	2	1	1	Cumings, Mrs. John Bradley (Florence Briggs Th...	38.0	1	0	PC 17599	71.2833	False	False	False
+2	3	1	3	Heikkinen, Miss. Laina	26.0	0	0	STON/O2. 3101282	7.9250	False	False	True
+3	4	1	1	Futrelle, Mrs. Jacques Heath (Lily May Peel)	35.0	1	0	113803	53.1000	False	False	True
+4	5	0	3	Allen, Mr. William Henry	35.0	0	0	373450	8.0500	True	False	True
+X = df[['Pclass', 'Age', 'SibSp', 'Parch', 'Fare', 'Sex_male', 'Embarked_Q', 'Embarked_S']]
+y = df['Survived']
+
+print(X.head())
+print(y.head())
+   Pclass   Age  SibSp  Parch     Fare  Sex_male  Embarked_Q  Embarked_S
+0       3  22.0      1      0   7.2500      True       False        True
+1       1  38.0      1      0  71.2833     False       False       False
+2       3  26.0      0      0   7.9250     False       False        True
+3       1  35.0      1      0  53.1000     False       False        True
+4       3  35.0      0      0   8.0500      True       False        True
+0    0
+1    1
+2    1
+3    1
+4    0
+Name: Survived, dtype: int64
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+print("Training data shape:", X_train.shape)
+print("Testing data shape:", X_test.shape)
+Training data shape: (712, 8)
+Testing data shape: (179, 8)
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression(max_iter=1000)
+
+model.fit(X_train, y_train)
+
+print("Model training complete!")
+Model training complete!
+y_pred = model.predict(X_test)
+
+print("Predictions:")
+print(y_pred[:10])  
+Predictions:
+[0 0 0 1 1 1 1 0 1 1]
+from sklearn.metrics import accuracy_score
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+Accuracy: 0.8100558659217877
+from sklearn.metrics import classification_report
+
+print(classification_report(y_test, y_pred))
+              precision    recall  f1-score   support
+
+           0       0.83      0.86      0.84       105
+           1       0.79      0.74      0.76        74
+
+    accuracy                           0.81       179
+   macro avg       0.81      0.80      0.80       179
+weighted avg       0.81      0.81      0.81       179
+
+ 
